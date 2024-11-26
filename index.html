@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Information Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .banner {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .chat-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            height: 400px;
+            overflow-y: scroll;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #e6f7ff;
+            text-align: right;
+        }
+        .bot-message {
+            background-color: #f4f4f4;
+        }
+        #query {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        #output {
+            margin-top: 20px;
+        }
+        .output {
+            margin-top: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #new-convo {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        Health Information
+    </div>
+
+    <h1>Chat with the Health Information Bot</h1>
+
+    <div id="chatHistory" class="chat-box">
+        <!-- Conversation history will be shown here -->
+    </div>
+
+    <form id="ragForm">
+        <label for="query">Type your query here:</label><br>
+        <input type="text" id="query" name="query" required><br><br>
+        <button type="submit">Send</button>
+    </form>
+
+    <button id="new-convo">Start New Conversation</button>
+
+    <script>
+        const chatHistory = document.getElementById('chatHistory');
+        const newConvoBtn = document.getElementById('new-convo');
+
+        // Function to update chat history
+        function updateChatHistory(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+            messageElement.innerText = message;
+            chatHistory.appendChild(messageElement);
+            chatHistory.scrollTop = chatHistory.scrollHeight; // Auto-scroll to the bottom
+        }
+
+        // Handle form submission for query
+        document.getElementById('ragForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const query = document.getElementById('query').value;
+
+            // Add user query to chat history
+            updateChatHistory(query, 'user');
+
+            // Clear the input field
+            document.getElementById('query').value = '';
+
+            try {
+                // Make a call to the generation API
+                const generateResponse = await fetch('http://127.0.0.1:5000/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query })
+                });
+
+                if (!generateResponse.ok) {
+                    throw new Error(`HTTP error! Status: ${generateResponse.status}`);
+                            }
+
+                const generateData = await generateResponse.json();
+
+                // Add bot response to chat history
+                updateChatHistory(generateData.response, 'bot');
+            } catch (error) {
+                document.getElementById('output').innerHTML = `Error: ${error.message}`;
+                console.error('Error fetching data:', error);
+            }
+        });
+
+        // Handle new conversation button click
+        newConvoBtn.addEventListener('click', function() {
+            // Clear chat history
+            chatHistory.innerHTML = '';
+            updateChatHistory('New conversation started.', 'bot');
+        });
+
+        // Start a new conversation on page load
+        window.onload = function() {
+            updateChatHistory('Welcome! How can I assist you with health information today?', 'bot');
+        };
+    </script>
+</body>
+</html>
