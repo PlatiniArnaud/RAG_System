@@ -1,0 +1,7 @@
+os
+openai
+python-dotenv
+pinecone-client
+flask
+flask_cors
+gunicorn==20.1.0
