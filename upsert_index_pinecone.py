@@ -38,6 +38,12 @@ index.describe_index_stats()
 
 index_df = pd.read_csv(f'{indexSaveDir}/index_df.csv')
 
+index_df1 = pd.read_csv(f'{indexSaveDir}/index_df1.csv')
+index_df2= pd.read_csv(f'{indexSaveDir}/index_df2.csv')
+index_df3 = pd.read_csv(f'{indexSaveDir}/index_df3.csv')
+index_df4 = pd.read_csv(f'{indexSaveDir}/index_df4.csv')
+index_df = pd.concat(index_df1, index_df2, index_df3, index_df4, ignore_index=True)
+
 def prepare_DF(df):
   import json,ast
   try: df=df.drop('Unnamed: 0',axis=1)
